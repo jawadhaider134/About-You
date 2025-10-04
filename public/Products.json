@@ -1,0 +1,50 @@
+{
+  "women": [
+    {
+      "id": 1,
+      "image": "https://images.unsplash.com/photo-1603252109303-2751441dd157?w=600",
+      "title": "Skirt",
+      "subtitle": "Women"
+    },
+    {
+      "id": 2,
+      "image": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600",
+      "title": "Topwear",
+      "subtitle": "Women"
+    },
+    {
+      "id": 3,
+      "image": "https://images.unsplash.com/photo-1503342394128-c104d54dba01?w=600",
+      "title": "Shirt",
+      "subtitle": "Women"
+    }
+  ],
+  "men": [
+    {
+      "id": 4,
+      "image": "https://images.unsplash.com/photo-1514996937319-344454492b37?w=600",
+      "title": "Shirt",
+      "subtitle": "Men"
+    },
+    {
+      "id": 5,
+      "image": "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?w=600",
+      "title": "Suit",
+      "subtitle": "Men"
+    }
+  ],
+  "kids": [
+    {
+      "id": 6,
+      "image": "https://images.unsplash.com/photo-1516179257071-7f3b9299d9f1?w=600",
+      "title": "T-Shirt",
+      "subtitle": "Kids"
+    },
+    {
+      "id": 7,
+      "image": "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6?w=600",
+      "title": "Sneakers",
+      "subtitle": "Kids"
+    }
+  ]
+}
