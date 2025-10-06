@@ -20,6 +20,11 @@ export default function MainHeader() {
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const location = useLocation();
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const isLoggedIn = !!user;
 
   const categories = [
     { name: "Women", path: "/women" },
@@ -27,7 +32,6 @@ export default function MainHeader() {
     { name: "Kids", path: "/kids" },
     { name: "All Collections", path: "/collections" },
   ];
-
 
   useEffect(() => {
     if (headerRef.current) {
@@ -42,8 +46,7 @@ export default function MainHeader() {
       const currentScrollY = window.scrollY;
       if (currentScrollY > headerHeight) {
         setIsFixed(true);
-      }
-      else if (currentScrollY <= headerHeight) {
+      } else if (currentScrollY <= headerHeight) {
         setIsFixed(false);
       }
 
@@ -90,41 +93,75 @@ export default function MainHeader() {
             <button aria-label="Coupons" className="hover:text-black">
               <RiCoupon2Line />
             </button>
+
+
             <div
               className="relative flex flex-col items-center"
-              onMouseEnter={() => setUserOpen(true)}
-              onMouseLeave={() => setUserOpen(false)}
+              onMouseEnter={() => setUserOpen(true)} // hover always opens dropdown
+              onMouseLeave={() => setUserOpen(false)} // hover always closes dropdown
             >
               <button
                 aria-label="User account"
                 className="hover:text-black"
                 onClick={() => {
-                  setUserOpen(false);
-                  setShowModal(true);
+                  if (isLoggedIn) {
+                    setUserOpen(!userOpen); // toggle for logged-in users
+                  } else {
+                    setShowModal(true); // open login modal for logged-out users
+                  }
                 }}
               >
-                <FaRegUser />
+                {isLoggedIn ? (
+                  <span className="w-8 h-8 bg-orange-500 flex items-center justify-center rounded-full font-semibold text-sm text-white shadow-2xl">
+                    {user.first_name?.[0].toUpperCase() || ""}
+                    {user.last_name?.[0].toUpperCase() || ""}
+                  </span>
+                ) : (
+                  <FaRegUser />
+                )}
               </button>
+
               {userOpen && (
                 <div className="absolute top-full right-[-20px] mt-3 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transition-all duration-300">
-                  <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-l border-t border-gray-200 rotate-45"></div>
-
+                  {/* Dropdown content */}
                   <div className="p-6 text-center border-b">
-                    <p className="font-semibold text-gray-800 mb-4">
-                      You are not logged in yet
-                    </p>
-                    <button
-                      className="w-80 bg-black text-white py-2 rounded font-semibold hover:-translate-y-1 
-             hover:shadow-[-4px_4px_10px_rgba(0,0,0,0.25)] 
-             transition-all duration-200 ease-out"
-                      onClick={() => {
-                        setUserOpen(false);
-                        setShowModal(true);
-                      }}
-                    >
-                      Log in
-                    </button>
+                    {isLoggedIn ? (
+                      <>
+                        <p className="font-semibold text-gray-800 mb-4">
+                          You are logged in as {user.first_name}{" "}
+                          {user.last_name}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setUser(null);
+                            localStorage.removeItem("user");
+                            setUserOpen(false);
+                          }}
+                          className="w-80 bg-black text-white py-2 rounded font-semibold hover:-translate-y-1 
+              hover:shadow-[-4px_4px_10px_rgba(0,0,0,0.25)] 
+              transition-all duration-200 ease-out"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold text-gray-800 mb-4">
+                          You are not logged in yet
+                        </p>
+                        <button
+                          className="w-80 bg-black text-white py-2 rounded font-semibold hover:-translate-y-1 
+              hover:shadow-[-4px_4px_10px_rgba(0,0,0,0.25)] 
+              transition-all duration-200 ease-out"
+                          onClick={() => setShowModal(true)}
+                        >
+                          Log in
+                        </button>
+                      </>
+                    )}
                   </div>
+
+                  {/* Track orders / Favorites */}
                   <div className="grid grid-cols-2">
                     <div className="flex items-center justify-center gap-2 py-3 px-2">
                       <FaShoppingBag />
@@ -138,6 +175,7 @@ export default function MainHeader() {
                 </div>
               )}
             </div>
+
             <button
               aria-label="Notifications"
               onClick={() => setNotifOpen(true)}
@@ -154,11 +192,18 @@ export default function MainHeader() {
             </button>
           </div>
         </div>
-
-
       </header>
-        <NotificationDrawer notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
-        {showModal && <AuthModal onClose={() => setShowModal(false)} />}
+      <NotificationDrawer notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
+      {showModal && (
+        <AuthModal
+          onClose={() => setShowModal(false)}
+          onLoginSuccess={(userData) => {
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+            setShowModal(false);
+          }}
+        />
+      )}
     </>
   );
 }

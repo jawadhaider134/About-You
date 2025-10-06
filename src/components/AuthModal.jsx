@@ -1,22 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { X, ArrowLeft } from "lucide-react";
-import { FaGoogle } from "react-icons/fa";
-import { FaFacebook } from "react-icons/fa6";
-import axios from "axios";
+import SocialLoginButtons from "./SocialLoginButtons";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
 
-export default function AuthModal({ onClose }) {
-  const [tab, setTab] = useState("login");
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [error, setError] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [gender, setGender] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(""); // for success messages
-
+export default function AuthModal({ onClose , onLoginSuccess}) {
+  const [tab, setTab] = useState("login"); 
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
@@ -24,7 +15,6 @@ export default function AuthModal({ onClose }) {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [onClose]);
-
   useEffect(() => {
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
@@ -34,88 +24,13 @@ export default function AuthModal({ onClose }) {
     };
   }, []);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await axios.post(
-        "https://tashya-mendez.onrender.com/custom/login/",
-        {
-          email: loginEmail,
-          password: loginPassword,
-        }
-      );
-      const userRole = response.data.role;
-      if (userRole === "admin") {
-        window.location.href = "https://tashya-mendez.onrender.com/admin/";
-      } else {
-        window.location.href = "/women";
-      }
-    } catch (error) {
-      console.error("Login failed", error);
-      alert("Login failed: check your credentials.");
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const requestData = {
-      first_name: firstName,
-      last_name: lastName,
-      email: registerEmail,
-      password1: registerPassword,
-      password2: registerPassword,
-      gender: gender,
-    };
-    try {
-      const response = await axios.post(
-        "https://tashya-mendez.onrender.com/auth/registration/",
-        requestData
-      );
-      setFirstName("");
-      setLastName("");
-      setRegisterEmail("");
-      setRegisterPassword("");
-      setGender("");
-      setLoading(false);
-      setError("");
-      setSuccess("Register successfully , Now you can login to your account !");
-    } catch (err) {
-      console.error("Registration failed", err);
-      setLoading(false);
-      setSuccess("");
-      if (err.response && err.response.data) {
-        const data = err.response.data;
-        let messages = [];
-        for (const key in data) {
-          if (Array.isArray(data[key])) {
-            data[key].forEach((msg) => {
-              messages.push(
-                `${key !== "non_field_errors" ? '' : ""}${msg}`
-              );
-            });
-          }
-        }
-        setError("Error: " + messages.join(""));
-      } else {
-        setError("Registration failed: Unknown error");
-      }
-    }
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onClose}
     >
-      {/* Modal */}
       <div
-        className={`bg-white rounded-2xl shadow-xl w-full relative transform transition-all duration-200 flex flex-col 
-        h-[580px] max-w-xl`}
+        className="bg-white rounded-2xl shadow-xl w-full relative transform transition-all duration-200 flex flex-col h-[580px] max-w-xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -147,7 +62,7 @@ export default function AuthModal({ onClose }) {
 
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1">
-          {/* Tabs (hide for forgot) */}
+          {/* Tab buttons */}
           {tab !== "forgot" && (
             <div className="flex justify-center mb-6">
               <div className="flex border rounded-md overflow-hidden w-80">
@@ -173,58 +88,24 @@ export default function AuthModal({ onClose }) {
             </div>
           )}
 
-          {/* Forgot Password */}
-          {tab === "forgot" && (
-            <div className="flex flex-col justify-center items-center h-full text-center space-y-6">
-              <p className="text-gray-700 text-sm max-w-sm">
-                Enter your email address and we’ll send you a link to reset your
-                password.
-              </p>
-              <input
-                type="email"
-                placeholder="Email address"
-                className="w-80 border border-gray-400 rounded-md px-3 py-3 
-                  focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-              />
-              <button
-                type="button"
-                className="w-80 bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-900"
-              >
-                Send Reset Link
-              </button>
-              <p className="text-sm text-gray-600">
-                No account?{" "}
-                <button
-                  type="button"
-                  onClick={() => setTab("register")}
-                  className="underline text-black font-medium"
-                >
-                  Register now
-                </button>
-              </p>
-            </div>
+          {tab === "login" && (
+            <>
+              
+              {/* <div className="flex items-center my-6">
+                <hr className="flex-1 border-gray-300" />
+                <span className="px-3 text-sm text-gray-500 whitespace-nowrap">
+                  or with your email address
+                </span>
+                <hr className="flex-1 border-gray-300" />
+              </div> */}
+              <LoginForm onLoginSuccess={onLoginSuccess} setTab={setTab} />
+
+            </>
           )}
 
-          {/* Forms */}
-          {tab !== "forgot" && (
+          {tab === "register" && (
             <>
-              {/* Social Logins */}
-              <div className="space-y-3 mb-6 flex flex-col items-center">
-                <button
-                  className="w-80 border rounded-md py-3 flex items-center gap-12 px-5 hover:bg-gray-50"
-                  onClick={() =>
-                    (window.location.href =
-                      "https://tashya-mendez.onrender.com/accounts/google/login/")
-                  }
-                >
-                  <FaGoogle size={25} /> <span>Sign up with Google</span>
-                </button>
-                <button className="w-80 border rounded-md py-3 flex items-center gap-12 px-5 hover:bg-gray-50">
-                  <FaFacebook size={25} /> <span>Sign up with Facebook</span>
-                </button>
-              </div>
-
-              {/* Divider */}
+              <SocialLoginButtons />
               <div className="flex items-center my-6">
                 <hr className="flex-1 border-gray-300" />
                 <span className="px-3 text-sm text-gray-500 whitespace-nowrap">
@@ -232,223 +113,11 @@ export default function AuthModal({ onClose }) {
                 </span>
                 <hr className="flex-1 border-gray-300" />
               </div>
-
-              <form
-                className="space-y-4"
-                onSubmit={tab === "login" ? handleLogin : handleRegister}
-              >
-                {/* LOGIN */}
-                {tab === "login" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="relative">
-                      <input
-                        type="email"
-                        id="login-email"
-                        name="email"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        placeholder=" "
-                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-             focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                      />
-                      <label
-                        htmlFor="login-email"
-                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                     peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                     peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                     peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                      >
-                        Email
-                      </label>
-                    </div>
-
-                    <div>
-                      <div className="relative">
-                        <input
-                          type="password"
-                          id="login-password"
-                          name="password"
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          placeholder=" "
-                          className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-             focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                        />
-                        <label
-                          htmlFor="login-password"
-                          className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                     peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                     peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                     peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                        >
-                          Password
-                        </label>
-                      </div>
-
-                      <div className="mt-2 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setTab("forgot")}
-                          className="text-sm font-medium text-gray-900"
-                        >
-                          Forgot your password?
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* REGISTER */}
-                {tab === "register" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="first-name"
-                        name="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder=" "
-                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-                                   focus:outline-none focus:border-black hover:border-black focus:ring-1 focus:ring-black"
-                      />
-                      <label
-                        htmlFor="first-name"
-                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                   peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                   peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                      >
-                        First name
-                      </label>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="last-name"
-                        name="lastName"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder=" "
-                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-                                   focus:outline-none focus:border-black focus:ring-1 focus:ring-black hover:border-black"
-                      />
-                      <label
-                        htmlFor="last-name"
-                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                   peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                   peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                      >
-                        Last name
-                      </label>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="email"
-                        id="register-email"
-                        name="registerEmail"
-                        value={registerEmail}
-                        onChange={(e) => setRegisterEmail(e.target.value)}
-                        placeholder=" "
-                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-                                   focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                      />
-                      <label
-                        htmlFor="register-email"
-                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                   peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                   peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                      >
-                        Email
-                      </label>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="password"
-                        id="register-password"
-                        name="registerPassword"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                        placeholder=" "
-                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-                                   focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                      />
-                      <label
-                        htmlFor="register-password"
-                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                   peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                   peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                   peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                      >
-                        Password
-                      </label>
-                    </div>
-
-                    {/* Gender Section */}
-                    <div className="col-span-2 mt-4">
-                      <p className="text-sm font-medium text-gray-900 mb-2">
-                        How should we address you?
-                      </p>
-                      <div className="flex gap-6">
-                        {["male", "female", "other"].map((g) => (
-                          <label
-                            key={g}
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
-                            <input
-                              type="radio"
-                              name="gender"
-                              value={g.toLowerCase()}
-                              onChange={(e) => setGender(e.target.value)}
-                              className="w-5 h-5 border-2 border-black text-black focus:ring-black"
-                            />
-                            <span>{g}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {error && (
-                  <p className="text-red-500 text-center mt-2">{error}</p>
-                )}
-                {success && (
-                  <p className="text-green-500 text-center mt-2">{success}</p>
-                )}
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`w-80 mx-auto block text-white py-3 rounded-lg font-medium mt-4 ${
-                    loading
-                      ? "bg-gray-700 cursor-not-allowed"
-                      : "bg-black hover:bg-gray-900"
-                  }`}
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      {tab === "login" ? "Logging in" : "Registering"}
-                      <span className="flex space-x-1">
-                        <span className="dot dot1"></span>
-                        <span className="dot dot2"></span>
-                        <span className="dot dot3"></span>
-                      </span>
-                    </span>
-                  ) : tab === "login" ? (
-                    "Log in"
-                  ) : (
-                    "Register"
-                  )}
-                </button>
-              </form>
+              <RegisterForm />
             </>
           )}
+
+          {tab === "forgot" && <ForgotPasswordForm  switchTab={setTab}/>}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import Header from "./components/Header/Header";
 import HeroSlider from "./components/HeroSlider";
@@ -26,7 +27,8 @@ function AdminLayout({ children }) {
 
 function App() {
   return (
-    <Router>
+    <GoogleOAuthProvider clientId="546605370258-l8ecnn762q3ftcu7teg7cjlb077534a1.apps.googleusercontent.com">
+      <Router>
       <Routes>
         <Route
           path="/"
@@ -78,6 +80,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </GoogleOAuthProvider>
   );
 }
 
