@@ -11,8 +11,6 @@ export default function LanguageSelector() {
     setLanguage(lang);
     setDropdownOpen(false);
   };
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -34,8 +32,6 @@ export default function LanguageSelector() {
           {language === "German" ? "Kontakt & Hilfe" : "Contact & Help"}
         </span>
       </div>
-
-      {/* Right side - Language Section */}
       <div ref={dropdownRef} className="relative h-full">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -45,12 +41,9 @@ export default function LanguageSelector() {
           <span>{language}</span>
         </button>
 
-        {/* Dropdown */}
         {dropdownOpen && (
           <div className="absolute right-0 mt-1 w-72 bg-white border border-gray-300 rounded shadow-lg z-50 p-4">
             <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2"><IoGlobeSharp /> <span>Language and Country</span></h3>
-
-            {/* Language buttons */}
             <div className="flex gap-2 mb-4">
               <button
                 onClick={() => handleSelect("German")}

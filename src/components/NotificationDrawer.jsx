@@ -5,7 +5,6 @@ import { FaRegClock } from "react-icons/fa6";
 import clothe from "../assets/clothe.avif";
 
 export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
-  // 🔒 Lock scroll when drawer is open
   useEffect(() => {
     if (notifOpen) {
       document.body.style.overflow = "hidden";
@@ -14,8 +13,6 @@ export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     }
-
-    // Cleanup when component unmounts
     return () => {
       document.body.style.overflow = "";
     };
@@ -23,21 +20,17 @@ export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
 
   return (
     <>
-      {/* Overlay */}
       {notifOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300"
           onClick={() => setNotifOpen(false)}
         />
       )}
-
-      {/* Drawer */}
       <div
         className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300
           ${notifOpen ? "translate-x-0" : "translate-x-full"}
           rounded-tl-2xl rounded-bl-2xl`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-tl-2xl">
           <div className="flex items-center gap-2 text-base font-semibold text-gray-900">
             <FaRegBell className="text-lg" />
@@ -50,12 +43,8 @@ export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
             <AiOutlineClose size={20} />
           </button>
         </div>
-
-        {/* Notifications list (gray background) */}
         <div className="bg-gray-200/50 h-[calc(100%-120px)] overflow-y-auto p-6 space-y-6">
-          {/* Example notification */}
           <div className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-            {/* Top row */}
             <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                 <FaRegClock className="text-gray-500" />
@@ -63,8 +52,6 @@ export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
               </div>
               <span className="text-xs text-gray-500">Yesterday</span>
             </div>
-
-            {/* Bottom row */}
             <div className="flex gap-4 p-4">
               <img
                 src={clothe}
@@ -82,8 +69,6 @@ export default function NotificationDrawer({ notifOpen, setNotifOpen }) {
             </div>
           </div>
         </div>
-
-        {/* Footer */}
         <div className="p-4 text-center text-gray-500 text-xs border-t border-gray-200 bg-white rounded-bl-2xl">
           You&apos;ve reached the end! <br />
           After a few days your notifications will be deleted automatically.

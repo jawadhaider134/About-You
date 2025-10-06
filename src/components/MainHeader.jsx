@@ -28,7 +28,7 @@ export default function MainHeader() {
     { name: "All Collections", path: "/collections" },
   ];
 
-  // ...existing code...
+
   useEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
@@ -40,12 +40,9 @@ export default function MainHeader() {
       if (!headerRef.current) return;
 
       const currentScrollY = window.scrollY;
-
-      // Fix header when scrolling down past its height
       if (currentScrollY > headerHeight) {
         setIsFixed(true);
       }
-      // Unfix header only when user scrolls up to the top (or above header)
       else if (currentScrollY <= headerHeight) {
         setIsFixed(false);
       }
@@ -58,9 +55,7 @@ export default function MainHeader() {
   }, [headerHeight]);
   return (
     <>
-      {/* Spacer only when fixed to avoid layout jump */}
       {isFixed && <div style={{ height: headerHeight }} />}
-
       <header
         ref={headerRef}
         className={`w-full border-b border-gray-300 transition-all duration-300 ${
@@ -70,12 +65,9 @@ export default function MainHeader() {
         }`}
       >
         <div className="h-16 flex items-center justify-between px-8">
-          {/* Center - Logo */}
           <div className="flex justify-center">
             <img src={logo} alt="Logo" className="w-40 h-auto" />
           </div>
-
-          {/* Left side - Categories */}
           <nav className="flex gap-6 text-gray-700 font-medium h-full">
             {categories.map((cat) => (
               <Link
@@ -94,14 +86,10 @@ export default function MainHeader() {
               </Link>
             ))}
           </nav>
-
-          {/* Right side - Icons */}
           <div className="flex items-center gap-6 text-xl text-gray-700 relative">
             <button aria-label="Coupons" className="hover:text-black">
               <RiCoupon2Line />
             </button>
-
-            {/* User with hover + click functionality */}
             <div
               className="relative flex flex-col items-center"
               onMouseEnter={() => setUserOpen(true)}
@@ -117,8 +105,6 @@ export default function MainHeader() {
               >
                 <FaRegUser />
               </button>
-
-              {/* Dropdown */}
               {userOpen && (
                 <div className="absolute top-full right-[-20px] mt-3 w-96 bg-white border border-gray-200 rounded-lg shadow-lg z-50 transition-all duration-300">
                   <div className="absolute -top-1.5 right-6 w-3 h-3 bg-white border-l border-t border-gray-200 rotate-45"></div>
@@ -152,8 +138,6 @@ export default function MainHeader() {
                 </div>
               )}
             </div>
-
-            {/* 🔔 Notification icon */}
             <button
               aria-label="Notifications"
               onClick={() => setNotifOpen(true)}
@@ -173,9 +157,7 @@ export default function MainHeader() {
 
 
       </header>
-        {/* Notification Drawer */}
         <NotificationDrawer notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
-        {/* Auth Modal */}
         {showModal && <AuthModal onClose={() => setShowModal(false)} />}
     </>
   );

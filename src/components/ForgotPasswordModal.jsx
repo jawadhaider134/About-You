@@ -9,14 +9,11 @@ export default function ForgotPasswordModal({ open, onClose, onBack }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Password reset link sent to:", email);
-    // 🔥 Here you’d call your API to send reset email
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      {/* Modal */}
       <div className="bg-white w-[400px] rounded-lg shadow-lg relative">
-        {/* Header */}
         <div className="flex items-center justify-between border-b px-4 py-3">
           <button onClick={onBack}>
             <AiOutlineArrowLeft size={20} />
@@ -26,8 +23,6 @@ export default function ForgotPasswordModal({ open, onClose, onBack }) {
             <AiOutlineClose size={20} />
           </button>
         </div>
-
-        {/* Body */}
         <form onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-4">
           <p className="text-sm text-gray-600 text-center">
             Please enter an email address and we will send you a link to reset
@@ -50,8 +45,6 @@ export default function ForgotPasswordModal({ open, onClose, onBack }) {
             Reset password
           </button>
         </form>
-
-        {/* Footer */}
         <div className="border-t px-6 py-4 text-center text-sm">
           No account yet?{" "}
           <button className="text-black font-medium hover:underline">

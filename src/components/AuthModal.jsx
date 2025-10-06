@@ -1,17 +1,22 @@
 import { useState, useEffect } from "react";
-import { X, ArrowLeft } from "lucide-react"; // ⬅️ Added ArrowLeft
+import { X, ArrowLeft } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import { FaFacebook } from "react-icons/fa6";
 import axios from "axios";
 
 export default function AuthModal({ onClose }) {
-  const [tab, setTab] = useState("login"); // login | register | forgot
-  const [showMore, setShowMore] = useState(false);
+  const [tab, setTab] = useState("login");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [error, setError] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(""); // for success messages
 
-  // Close modal on ESC key
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
@@ -28,35 +33,79 @@ export default function AuthModal({ onClose }) {
       document.documentElement.style.overflow = "";
     };
   }, []);
+
   const handleLogin = async (e) => {
-  e.preventDefault();
-
-  try {
-    const response = await axios.post(
-      "https://tashya-mendez.onrender.com/custom/login/",
-      {
-        email: loginEmail,      
-        password: loginPassword 
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "https://tashya-mendez.onrender.com/custom/login/",
+        {
+          email: loginEmail,
+          password: loginPassword,
+        }
+      );
+      const userRole = response.data.role;
+      if (userRole === "admin") {
+        window.location.href = "https://tashya-mendez.onrender.com/admin/";
+      } else {
+        window.location.href = "/women";
       }
-    );
-
-    // Assuming backend sends user role
-    const userRole = response.data.role;
-    console.log(userRole)
-
-    if (userRole === "admin") {
-      // Redirect to external admin panel
-      window.location.href = "https://tashya-mendez.onrender.com/admin/";
-    } else {
-      // Redirect to internal dashboard
-      window.location.href = "/women";
+    } catch (error) {
+      console.error("Login failed", error);
+      alert("Login failed: check your credentials.");
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Login failed", error);
-    alert("Login failed: check your credentials.");
-  }
-};
+  };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const requestData = {
+      first_name: firstName,
+      last_name: lastName,
+      email: registerEmail,
+      password1: registerPassword,
+      password2: registerPassword,
+      gender: gender,
+    };
+    try {
+      const response = await axios.post(
+        "https://tashya-mendez.onrender.com/auth/registration/",
+        requestData
+      );
+      setFirstName("");
+      setLastName("");
+      setRegisterEmail("");
+      setRegisterPassword("");
+      setGender("");
+      setLoading(false);
+      setError("");
+      setSuccess("Register successfully , Now you can login to your account !");
+    } catch (err) {
+      console.error("Registration failed", err);
+      setLoading(false);
+      setSuccess("");
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        let messages = [];
+        for (const key in data) {
+          if (Array.isArray(data[key])) {
+            data[key].forEach((msg) => {
+              messages.push(
+                `${key !== "non_field_errors" ? '' : ""}${msg}`
+              );
+            });
+          }
+        }
+        setError("Error: " + messages.join(""));
+      } else {
+        setError("Registration failed: Unknown error");
+      }
+    }
+  };
 
   return (
     <div
@@ -161,7 +210,13 @@ export default function AuthModal({ onClose }) {
             <>
               {/* Social Logins */}
               <div className="space-y-3 mb-6 flex flex-col items-center">
-                <button className="w-80 border rounded-md py-3 flex items-center gap-12 px-5 hover:bg-gray-50">
+                <button
+                  className="w-80 border rounded-md py-3 flex items-center gap-12 px-5 hover:bg-gray-50"
+                  onClick={() =>
+                    (window.location.href =
+                      "https://tashya-mendez.onrender.com/accounts/google/login/")
+                  }
+                >
                   <FaGoogle size={25} /> <span>Sign up with Google</span>
                 </button>
                 <button className="w-80 border rounded-md py-3 flex items-center gap-12 px-5 hover:bg-gray-50">
@@ -178,68 +233,66 @@ export default function AuthModal({ onClose }) {
                 <hr className="flex-1 border-gray-300" />
               </div>
 
-              <form className="space-y-4" onSubmit={handleLogin}>
+              <form
+                className="space-y-4"
+                onSubmit={tab === "login" ? handleLogin : handleRegister}
+              >
                 {/* LOGIN */}
                 {tab === "login" && (
-                  <div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Email */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="relative">
+                      <input
+                        type="email"
+                        id="login-email"
+                        name="email"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        placeholder=" "
+                        className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
+             focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                      />
+                      <label
+                        htmlFor="login-email"
+                        className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
+                                     peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
+                                     peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
+                                     peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
+                      >
+                        Email
+                      </label>
+                    </div>
+
+                    <div>
                       <div className="relative">
                         <input
-                          type="email"
-                          id="login-email"
-                          name="email"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
+                          type="password"
+                          id="login-password"
+                          name="password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
                           placeholder=" "
                           className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
              focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                         />
                         <label
-                          htmlFor="login-email"
+                          htmlFor="login-password"
                           className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
                                      peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
                                      peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
                                      peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
                         >
-                          Email
+                          Password
                         </label>
                       </div>
 
-                      {/* Password */}
-                      <div>
-                        <div className="relative">
-                          <input
-                            type="password"
-                            id="login-password"
-                            name="password"
-                            value={loginPassword}
-                            onChange={(e) => setLoginPassword(e.target.value)}
-                            placeholder=" "
-                            className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
-             focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
-                          />
-                          <label
-                            htmlFor="login-password"
-                            className="absolute left-3 top-3 text-gray-500 text-base transition-all bg-white px-1
-                                       peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                                       peer-focus:-top-2 peer-focus:text-sm peer-focus:text-black
-                                       peer-[&:not(:placeholder-shown)]:-top-2 peer-[&:not(:placeholder-shown)]:text-sm peer-[&:not(:placeholder-shown)]:text-black"
-                          >
-                            Password
-                          </label>
-                        </div>
-
-                        {/* Forgot password */}
-                        <div className="mt-2 text-right">
-                          <button
-                            type="button"
-                            onClick={() => setTab("forgot")}
-                            className="text-sm font-medium text-gray-900"
-                          >
-                            Forgot your password?
-                          </button>
-                        </div>
+                      <div className="mt-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setTab("forgot")}
+                          className="text-sm font-medium text-gray-900"
+                        >
+                          Forgot your password?
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -248,12 +301,13 @@ export default function AuthModal({ onClose }) {
                 {/* REGISTER */}
                 {tab === "register" && (
                   <div className="grid grid-cols-2 gap-4">
-                    {/* First Name */}
                     <div className="relative">
                       <input
                         type="text"
                         id="first-name"
                         name="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
                         placeholder=" "
                         className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
                                    focus:outline-none focus:border-black hover:border-black focus:ring-1 focus:ring-black"
@@ -269,12 +323,13 @@ export default function AuthModal({ onClose }) {
                       </label>
                     </div>
 
-                    {/* Last Name */}
                     <div className="relative">
                       <input
                         type="text"
                         id="last-name"
                         name="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
                         placeholder=" "
                         className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
                                    focus:outline-none focus:border-black focus:ring-1 focus:ring-black hover:border-black"
@@ -290,12 +345,13 @@ export default function AuthModal({ onClose }) {
                       </label>
                     </div>
 
-                    {/* Email */}
                     <div className="relative">
                       <input
                         type="email"
                         id="register-email"
                         name="registerEmail"
+                        value={registerEmail}
+                        onChange={(e) => setRegisterEmail(e.target.value)}
                         placeholder=" "
                         className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
                                    focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
@@ -311,12 +367,13 @@ export default function AuthModal({ onClose }) {
                       </label>
                     </div>
 
-                    {/* Password */}
                     <div className="relative">
                       <input
                         type="password"
                         id="register-password"
                         name="registerPassword"
+                        value={registerPassword}
+                        onChange={(e) => setRegisterPassword(e.target.value)}
                         placeholder=" "
                         className="peer w-full border border-gray-400 rounded-md px-3 pt-5 pb-2 
                                    focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
@@ -338,80 +395,57 @@ export default function AuthModal({ onClose }) {
                         How should we address you?
                       </p>
                       <div className="flex gap-6">
-                        {["Male", "Female", "Other"].map((gender) => (
+                        {["male", "female", "other"].map((g) => (
                           <label
-                            key={gender}
+                            key={g}
                             className="flex items-center gap-2 cursor-pointer"
                           >
                             <input
                               type="radio"
                               name="gender"
-                              value={gender.toLowerCase()}
+                              value={g.toLowerCase()}
+                              onChange={(e) => setGender(e.target.value)}
                               className="w-5 h-5 border-2 border-black text-black focus:ring-black"
                             />
-                            <span>{gender}</span>
+                            <span>{g}</span>
                           </label>
                         ))}
                       </div>
                     </div>
-
-                    {/* Newsletter Checkbox */}
-                    <div className="col-span-2 mt-4">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="newsletter"
-                          className="w-10 h-4 border-2 border-gray-400 text-black focus:ring-black"
-                        />
-                        <span className="text-sm text-gray-700">
-                          I would like to receive newsletters from ABOUT YOU
-                          about current trends, offers and vouchers in
-                          accordance with the Privacy Policy.{" "}
-                          {showMore ? (
-                            <>
-                              You can withdraw your consent at any time with
-                              effect for the future by sending a message to{" "}
-                              <a
-                                href="mailto:customerservice@aboutyou.de"
-                                className="underline"
-                              >
-                                customerservice@aboutyou.de
-                              </a>{" "}
-                              or using the unsubscribe option at the end of each
-                              newsletter.
-                              <button
-                                type="button"
-                                className="text-black underline ml-1"
-                                onClick={() => setShowMore(false)}
-                              >
-                                Show less
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              type="button"
-                              className="text-black underline ml-1"
-                              onClick={() => setShowMore(true)}
-                            >
-                              Show more
-                            </button>
-                          )}
-                        </span>
-                      </label>
-                    </div>
                   </div>
+                )}
+                {error && (
+                  <p className="text-red-500 text-center mt-2">{error}</p>
+                )}
+                {success && (
+                  <p className="text-green-500 text-center mt-2">{success}</p>
                 )}
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-80 mx-auto block bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-900 mt-4"
+                  disabled={loading}
+                  className={`w-80 mx-auto block text-white py-3 rounded-lg font-medium mt-4 ${
+                    loading
+                      ? "bg-gray-700 cursor-not-allowed"
+                      : "bg-black hover:bg-gray-900"
+                  }`}
                 >
-                  {tab === "login" ? "Log in" : "Register"}
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      {tab === "login" ? "Logging in" : "Registering"}
+                      <span className="flex space-x-1">
+                        <span className="dot dot1"></span>
+                        <span className="dot dot2"></span>
+                        <span className="dot dot3"></span>
+                      </span>
+                    </span>
+                  ) : tab === "login" ? (
+                    "Log in"
+                  ) : (
+                    "Register"
+                  )}
                 </button>
-                {error && (
-                  <p className="text-red-500 text-center mt-2">{error}</p>
-                )}
               </form>
             </>
           )}

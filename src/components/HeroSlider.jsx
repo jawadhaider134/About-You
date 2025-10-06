@@ -1,17 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { MdWifiOff } from "react-icons/md";
-
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const progressInterval = useRef(null);
-
-  // Fetch slides from API on mount
   useEffect(() => {
     async function fetchSlides() {
       try {
@@ -26,22 +21,6 @@ export default function HeroSlider() {
     }
     fetchSlides();
   }, []);
-
-  // Online / Offline Detection
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  // Start progress / auto slide
   useEffect(() => {
     if (slides.length === 0) return;
     startProgress();
@@ -90,14 +69,6 @@ export default function HeroSlider() {
 
   return (
     <div className="relative w-full h-[600px] overflow-hidden">
-      {/* No Internet Banner */}
-      {!isOnline && (
-        <div className="absolute top-0 left-0 w-full bg-red-600 text-white flex items-center justify-center gap-2 py-2 z-50">
-          <MdWifiOff size={20} />
-          <span>Please connect to internet</span>
-        </div>
-      )}
-
       {slides.map((slide, idx) => (
         <motion.div
           key={idx}
@@ -138,8 +109,6 @@ export default function HeroSlider() {
           </div>
         </motion.div>
       ))}
-
-      {/* Progress Bars */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 w-full max-w-xs px-4">
         {slides.map((_, idx) => (
           <div
@@ -163,7 +132,6 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      {/* Navigation Buttons */}
       <div className="absolute bottom-6 right-6 flex gap-2">
         <button
           onClick={() => {

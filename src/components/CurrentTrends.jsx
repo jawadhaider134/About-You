@@ -56,11 +56,9 @@ export default function CurrentTrends() {
     ],
   };
 
-  // Update trends when route changes
  useEffect(() => {
   let currentPath = location.pathname;
 
-  // If root "/", treat it as "/women"
   if (currentPath === "/") {
     currentPath = "/women";
   }
@@ -68,11 +66,10 @@ export default function CurrentTrends() {
   if (dataSets[currentPath]) {
     setTrends(dataSets[currentPath]);
   } else {
-    setTrends([]); // fallback if route doesn’t match
+    setTrends([]); 
   }
 }, [location.pathname]);
 
-  // same scroll logic as before
   const getCardStep = () => {
     const el = scrollRef.current;
     if (!el || !el.firstElementChild) return 0;

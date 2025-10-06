@@ -50,8 +50,6 @@ export default function CategoryNav() {
             </li>
           ))}
         </ul>
-
-        {/* Search icon */}
         {!searchOpen && (
           <button
             onClick={() => setSearchOpen(true)}
@@ -60,8 +58,6 @@ export default function CategoryNav() {
             <FiSearch />
           </button>
         )}
-
-        {/* Search Bar (inside same height container) */}
         <div
           className={`absolute inset-0 flex items-center px-6 gap-3 bg-white transition-all duration-500 ease-in-out ${
             searchOpen
