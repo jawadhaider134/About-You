@@ -1,15 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import g1 from "../assets/g1.jpg";
-import g2 from "../assets/g2.webp";
-import g3 from "../assets/g3.webp";
-import g4 from "../assets/g5.webp";
-import m1 from "../assets/m1.webp"
-import m2 from "../assets/m2.avif"
-import m3 from "../assets/m3.avif"
-import m4 from "../assets/m4.webp"
-import m5 from "../assets/m5.webp"
+import axios from "axios";
 
 export default function CurrentTrends() {
   const [trends, setTrends] = useState([]);
@@ -19,57 +11,43 @@ export default function CurrentTrends() {
   const rafRef = useRef(null);
   const location = useLocation();
 
-  // Mock datasets for each category
-  const dataSets = {
-    "/women": [
-      { id: 1, image: g1, title: "DRESSES", subtitle: "Trending now" },
-      { id: 2, image: g2, title: "HEELS", subtitle: "Best picks" },
-      { id: 3, image: g3, title: "HANDBAGS", subtitle: "Fresh arrivals" },
-      { id: 4, image: g4, title: "ACCESSORIES", subtitle: "Top rated" },
-      { id: 1, image: g1, title: "DRESSES", subtitle: "Trending now" },
-      { id: 2, image: g2, title: "HEELS", subtitle: "Best picks" },
-      { id: 3, image: g3, title: "HANDBAGS", subtitle: "Fresh arrivals" },
-      { id: 4, image: g4, title: "ACCESSORIES", subtitle: "Top rated" },
-    ],
-    "/men": [
-      { id: 5, image: m1, title: "SHIRTS", subtitle: "Popular now" },
-      { id: 6, image: m2, title: "SUITS", subtitle: "Smart look" },
-      { id: 7, image: m3, title: "SNEAKERS", subtitle: "Street style" },
-      { id: 8, image: m4, title: "WATCHES", subtitle: "Luxury picks" },
-      { id: 8, image: m5, title: "Jeans", subtitle: "Luxury picks" },
-    ],
-    "/kids": [
-      { id: 9, image: g1, title: "T-SHIRTS", subtitle: "Playtime ready" },
-      { id: 10, image: g2, title: "SHORTS", subtitle: "Summer vibe" },
-      { id: 11, image: g3, title: "SNEAKERS", subtitle: "Little trends" },
-      { id: 12, image: g4, title: "JACKETS", subtitle: "Season must-haves" },
-    ],
-    "/collections": [
-      { id: 13, image: g1, title: "NEW ARRIVALS", subtitle: "Fresh drop" },
-      { id: 14, image: g2, title: "SALE", subtitle: "Don’t miss out" },
-      { id: 15, image: g3, title: "LIMITED EDITION", subtitle: "Rare finds" },
-      { id: 16, image: g4, title: "EDITOR’S PICK", subtitle: "Curated" },
-      { id: 5, image: m1, title: "SHIRTS", subtitle: "Popular now" },
-      { id: 6, image: m2, title: "SUITS", subtitle: "Smart look" },
-      { id: 7, image: m3, title: "SNEAKERS", subtitle: "Street style" },
-      { id: 8, image: m4, title: "WATCHES", subtitle: "Luxury picks" },
-    ],
-  };
+  // Fetch products dynamically based on current category
+  useEffect(() => {
+    const fetchProducts = async () => {
+      let currentPath = location.pathname;
+      let category = "";
 
- useEffect(() => {
-  let currentPath = location.pathname;
+      if (currentPath === "/" || currentPath === "/women") category = "women";
+      else if (currentPath === "/men") category = "Men";
+      else if (currentPath === "/kids") category = "kids";
+      else if (currentPath === "/collections") category = ""; // all categories
 
-  if (currentPath === "/") {
-    currentPath = "/women";
-  }
+      try {
+        const response = await axios.post(
+          "https://tashya-mendez.onrender.com/api/products/filter",
+          { category }
+        );
 
-  if (dataSets[currentPath]) {
-    setTrends(dataSets[currentPath]);
-  } else {
-    setTrends([]); 
-  }
-}, [location.pathname]);
+        const products = response.data;
 
+        // Group products by name for the carousel
+        const grouped = {};
+        products.forEach((prod) => {
+          const key = prod.name.split(".")[0];
+          if (!grouped[key]) grouped[key] = prod;
+        });
+
+        setTrends(Object.values(grouped));
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+        setTrends([]);
+      }
+    };
+
+    fetchProducts();
+  }, [location.pathname]);
+
+  // Scroll helpers
   const getCardStep = () => {
     const el = scrollRef.current;
     if (!el || !el.firstElementChild) return 0;
@@ -170,18 +148,18 @@ export default function CurrentTrends() {
         {trends.map((item) => (
           <Link
             key={item.id}
-            to={`/products/${item.id}`}
+            to={`/products/${item.name.split(".")[0]}`}
             className="min-w-[250px] md:min-w-[300px] rounded-lg overflow-hidden flex-shrink-0 
                        cursor-pointer transition-transform duration-300 block"
           >
             <img
-              src={item.image}
-              alt={item.title}
+              src={`https://tashya-mendez.onrender.com/media/${item.name}`}
+              alt={item.name}
               className="w-full h-[400px] object-cover"
             />
             <div className="p-3 text-left">
-              <h3 className="font-bold text-lg">{item.title}</h3>
-              <p className="text-gray-600">{item.subtitle}</p>
+              <h3 className="font-bold text-lg">{item.name.split(".")[0]}</h3>
+              <p className="text-gray-600">{item.category}</p>
             </div>
           </Link>
         ))}

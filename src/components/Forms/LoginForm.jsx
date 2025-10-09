@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { GoogleLogin } from "@react-oauth/google";
-import SocialLoginButtons from "./SocialLoginButtons";
-
-
-export default function LoginForm({ onLoginSuccess, setTab }) {
+export default function LoginForm({ onLoginSuccess, setTab , error , setError }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  
   const [loading, setLoading] = useState(false);
   //
   const handleLogin = async (e) => {
@@ -30,7 +26,9 @@ export default function LoginForm({ onLoginSuccess, setTab }) {
         if (userRole === "admin") {
           window.location.href = "https://tashya-mendez.onrender.com/admin/";
         } else {
-          onLoginSuccess(data.user);
+          window.location.href = "http://localhost:3000/women";
+          console.log(data)
+          onLoginSuccess(data);
         }
       } else {
         setError("Login failed: check your credentials.");
@@ -43,7 +41,7 @@ export default function LoginForm({ onLoginSuccess, setTab }) {
 
   return (
     <>
-    <SocialLoginButtons onLoginSuccess={onLoginSuccess} setError={setError} />
+    
     <form className="space-y-4" onSubmit={handleLogin}>
       <div className="grid grid-cols-2 gap-4">
         {/* Email */}

@@ -1,13 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { X, ArrowLeft } from "lucide-react";
-import SocialLoginButtons from "./SocialLoginButtons";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
-import ForgotPasswordForm from "./ForgotPasswordForm";
+import SocialLoginButtons from "../components/Forms/SocialLoginButtons";
+import LoginForm from "../components/Forms/LoginForm";
+import RegisterForm from "../components/Forms/RegisterForm";
+import ForgotPasswordForm from "../components/Forms/ForgotPasswordForm";
 
 export default function AuthModal({ onClose , onLoginSuccess}) {
   const [tab, setTab] = useState("login"); 
+  const [error, setError] = useState("");
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
@@ -90,22 +91,21 @@ export default function AuthModal({ onClose , onLoginSuccess}) {
 
           {tab === "login" && (
             <>
-              
-              {/* <div className="flex items-center my-6">
+            <SocialLoginButtons onLoginSuccess={onLoginSuccess} setError={setError} error={error} />
+                <div className="flex items-center my-6">
                 <hr className="flex-1 border-gray-300" />
                 <span className="px-3 text-sm text-gray-500 whitespace-nowrap">
                   or with your email address
                 </span>
                 <hr className="flex-1 border-gray-300" />
-              </div> */}
-              <LoginForm onLoginSuccess={onLoginSuccess} setTab={setTab} />
-
+              </div>
+            <LoginForm onLoginSuccess={onLoginSuccess} setTab={setTab} error={error} setError={setError} />
             </>
           )}
 
           {tab === "register" && (
             <>
-              <SocialLoginButtons />
+              <SocialLoginButtons onLoginSuccess={onLoginSuccess} setError={setError} error={error} />
               <div className="flex items-center my-6">
                 <hr className="flex-1 border-gray-300" />
                 <span className="px-3 text-sm text-gray-500 whitespace-nowrap">

@@ -1,26 +1,50 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [loading, setLoading] = useState(true);
   const progressInterval = useRef(null);
+
   useEffect(() => {
     async function fetchSlides() {
       try {
+        // Try to get cached slides
+        const cachedSlides = localStorage.getItem("heroSlides");
+        if (cachedSlides) {
+          setSlides(JSON.parse(cachedSlides));
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch("https://tashya-mendez.onrender.com/api/hero");
         const data = await res.json();
-        setSlides(data);
+
+        // Convert all slide images to Base64
+        const slidesWithBase64 = await Promise.all(
+          data.map(async (slide) => {
+            const imgRes = await fetch(slide.image);
+            const blob = await imgRes.blob();
+            const base64 = await blobToBase64(blob);
+            return { ...slide, image: base64 };
+          })
+        );
+
+        localStorage.setItem("heroSlides", JSON.stringify(slidesWithBase64));
+        setSlides(slidesWithBase64);
       } catch (err) {
         console.error("Failed to fetch hero slides:", err);
       } finally {
         setLoading(false);
       }
     }
+
     fetchSlides();
   }, []);
+
   useEffect(() => {
     if (slides.length === 0) return;
     startProgress();
@@ -58,7 +82,15 @@ export default function HeroSlider() {
     setProgress(0);
   };
 
-  // Show loader
+  // Helper to convert Blob to Base64
+  const blobToBase64 = (blob) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center w-full h-[600px] bg-gray-100">
@@ -109,6 +141,7 @@ export default function HeroSlider() {
           </div>
         </motion.div>
       ))}
+
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 w-full max-w-xs px-4">
         {slides.map((_, idx) => (
           <div
